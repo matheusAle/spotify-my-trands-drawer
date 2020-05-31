@@ -50,7 +50,7 @@ export default {
 
     &__name {
       width: 100%;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;

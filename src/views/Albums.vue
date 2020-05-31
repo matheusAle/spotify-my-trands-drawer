@@ -5,7 +5,6 @@
         class="album_item"
         v-for="(disc, index) of $store.state.albums.list" :key="disc.id"
         :class="{ '--active': index === viewItemindex }"
-        :style="index === viewItemindex ? { '--itemY': `${itemPos}px` } : ''"
         @click.stop="view(index, $event)"
       >
         <div class="album">
@@ -17,7 +16,7 @@
 </template>
 
 <script>
-    import {ALBUM_VISIBLE__SET, ALBUM_VISIBLE__UNSET, ALBUMS__FETCH_DISCS} from "../store";
+  import {ALBUM_VISIBLE__SET, ALBUM_VISIBLE__UNSET, ALBUMS__FETCH_DISCS, SET_AUTH} from "../store";
     export default {
         data: () => ({
             viewItemindex: -1,
@@ -25,7 +24,8 @@
         }),
         async created() {
             if (!this.$store.state.isAuthorized) {
-                this.$router.replace('/')
+              await this.$store.dispatch(SET_AUTH, false);
+              this.$router.replace('/')
             }
             try {
                 await this.$store.dispatch(ALBUMS__FETCH_DISCS);
@@ -39,10 +39,19 @@
                 if (this.viewItemindex === index) {
                     return this.close();
                 }
-                const rect = event.target.getClientRects()[0];
-                this.itemPos = -rect.y;
+                const initialPos = event.target.getBoundingClientRect();
                 this.viewItemindex = index;
                 this.$store.dispatch(ALBUM_VISIBLE__SET, this.$store.state.albums.list[this.viewItemindex])
+
+                this.$nextTick(() => {
+                  event.target.animate([
+                    { transform: `rotateX(-30deg) translateY(${ initialPos.top }px)` },
+                    { transform: 'rotateX(0deg) translateY(0)' }
+                  ], {
+                    duration: 500,
+                    easing: 'cubic-bezier(.31,.8,.65,1.01)',
+                  });
+                });
             },
             close() {
                 this.itemPos = null;
@@ -80,12 +89,13 @@
       transform: rotateX(-30deg);
       transform-origin: 50% 0;
       perspective-origin: 50% 50%;
-      transition: transform 450ms, width 450ms;
       width: 90vw;
 
       &.--active {
-        transform: rotateX(0deg) translateY(calc(var(--itemY) + 10px));
-        width: 70vw;
+        transform: rotateX(0deg);
+        position: fixed;
+        top: 30px;
+        width: 80vw;
         z-index: 9;
 
         .album::after {
@@ -94,6 +104,7 @@
       }
 
       .album {
+        pointer-events: none;
         position: relative;
         border-radius: 10px;
         overflow: hidden;
