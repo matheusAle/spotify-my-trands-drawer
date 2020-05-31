@@ -1,11 +1,11 @@
 <template>
   <div class="container">
-    <div class="albums_list" :class="{ '--active': viewItemindex > -1 }" @click="close()">
+    <div class="albums_list" :style="{ '--totalItems': $store.state.albums.list.length }">
       <div
         class="album_item"
-        v-for="(disc, index) of $store.state.albums.list" :key="disc.id"
-        :class="{ '--active': index === viewItemindex }"
-        @click.stop="view(index, $event)"
+        v-for="disc of $store.state.albums.list" :key="disc.id"
+        :ref="disc.id"
+        @click.stop="view(disc, $event)"
       >
         <div class="album">
           <img class="album__cover" :src="disc.images[0].url">
@@ -16,50 +16,69 @@
 </template>
 
 <script>
-  import {ALBUM_VISIBLE__SET, ALBUM_VISIBLE__UNSET, ALBUMS__FETCH_DISCS, SET_AUTH} from "../store";
-    export default {
-        data: () => ({
-            viewItemindex: -1,
-            itemPos: null,
-        }),
-        async created() {
-            if (!this.$store.state.isAuthorized) {
-              await this.$store.dispatch(SET_AUTH, false);
-              this.$router.replace('/')
-            }
-            try {
-                await this.$store.dispatch(ALBUMS__FETCH_DISCS);
-            } catch (e) {
-                this.$router.replace('/');
-                console.error(e)
-            }
-        },
-        methods: {
-            view(index, event) {
-                if (this.viewItemindex === index) {
-                    return this.close();
-                }
-                const initialPos = event.target.getBoundingClientRect();
-                this.viewItemindex = index;
-                this.$store.dispatch(ALBUM_VISIBLE__SET, this.$store.state.albums.list[this.viewItemindex])
-
-                this.$nextTick(() => {
-                  event.target.animate([
-                    { transform: `rotateX(-30deg) translateY(${ initialPos.top }px)` },
-                    { transform: 'rotateX(0deg) translateY(0)' }
-                  ], {
-                    duration: 500,
-                    easing: 'cubic-bezier(.31,.8,.65,1.01)',
-                  });
-                });
-            },
-            close() {
-                this.itemPos = null;
-                this.viewItemindex = -1;
-                this.$store.dispatch(ALBUM_VISIBLE__UNSET)
-            }
+  import {ALBUM_VISIBLE__SET, ALBUM_VISIBLE__UNSET, ALBUMS__FETCH_DISCS} from "../store";
+  export default {
+    data: () => ({
+      viewItemindex: -1,
+      itemPos: null,
+    }),
+    computed: {
+      activeAlbumId() {
+        return this.$store.state.visibleAlbum?.album?.id
+      }
+    },
+    async created() {
+      if (!this.$store.state.isAuthorized) {
+        this.$router.replace('/')
+      }
+      try {
+        await this.$store.dispatch(ALBUMS__FETCH_DISCS);
+      } catch (e) {
+        this.$router.replace('/');
+      }
+    },
+    watch: {
+      activeAlbumId(newValue, oldValue) {
+        const [el] = this.$refs[newValue || oldValue];
+        const initialPos = el.getBoundingClientRect();
+        if (newValue) {
+          el.classList.add('--active');
+          this.animate(el, [
+            { transform: `rotateX(-30deg) translateY(${ initialPos.top }px)` },
+            { transform: 'rotateX(0deg) translateY(0)' },
+          ]);
+        } else {
+          el.classList.remove('--active');
+          const endPos = el.getBoundingClientRect();
+          this.animate( el,[
+            { transform: `rotateX(0deg) translateY(${ initialPos.top - endPos.top }px)` },
+            { transform: `rotateX(-30deg) translateY(0px)` },
+          ])
         }
+      }
+    },
+    methods: {
+      animate(el, frames) {
+        el.animate(frames, {
+          duration: 500,
+          easing: 'cubic-bezier(.31,.8,.65,1.01)',
+        });
+      },
+      view(disc) {
+        if (this.activeAlbumId === disc.id) {
+          return this.close();
+        }
+        this.$store.dispatch(ALBUM_VISIBLE__SET, disc)
+
+
+      },
+      close() {
+        this.itemPos = null;
+        this.viewItemindex = -1;
+        this.$store.dispatch(ALBUM_VISIBLE__UNSET)
+      }
     }
+  }
 </script>
 
 <style lang="scss" scoped>
@@ -70,26 +89,21 @@
   }
 
   .albums_list {
+    padding-top: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
-
-    &.--active {
-      .album_item:not(.--active) {
-        visibility: hidden;
-      }
-
-    }
+    min-height: calc(50ch + calc(var(--totalItems) * 90));
 
     .album_item {
-      height: 80px;
+      height: 90px;
       transform-style: preserve-3d;
       transform: rotateX(-30deg);
       transform-origin: 50% 0;
       perspective-origin: 50% 50%;
       width: 90vw;
+      transition: transform 500ms cubic-bezier(.31,.8,.65,1.01);
 
       &.--active {
         transform: rotateX(0deg);

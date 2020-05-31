@@ -90,7 +90,7 @@ export default new Vuex.Store({
         },
         [_getAct(ALBUM_VISIBLE__UNSET)]({ commit }) {
           commit('setLoading', false);
-          commit('setAlbum', undefined);
+          commit('setAlbum', {});
           commit('setViewing', false);
           commit('setTracks', []);
         }

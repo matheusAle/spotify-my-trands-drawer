@@ -22,10 +22,10 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   background-color: $color-darker;
   height: 100vh;
-  overflow: auto;
   perspective: 210px;
   perspective-origin: 50% 50%;
   font-size: 13px;
+  overflow: hidden;
 
   * {
     box-sizing: border-box !important;

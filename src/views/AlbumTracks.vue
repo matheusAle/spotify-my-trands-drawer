@@ -1,5 +1,5 @@
 <template>
-  <div class="album_track_list">
+  <div class="album_track_list" v-on="$listeners">
     <transition-group
       name="track"
       tag="div"
