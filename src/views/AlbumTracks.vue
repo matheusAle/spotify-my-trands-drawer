@@ -1,16 +1,33 @@
 <template>
   <div class="album_track_list">
-    <div v-for="(track, index) in $store.state.visibleAlbum.tracks" :key="index" class="track">
-      <div class="track__ic-container"><i class="icon-pause"></i></div>
-      <span class="track__name">{{ track.name }}</span>
-      <span class="track__time">{{ track.duration_ms | duration('milliseconds')}}</span>
-    </div>
+    <transition-group
+      name="track"
+      tag="div"
+      @before-enter="beforeEnter"
+    >
+      <div
+        v-for="(track, index) in $store.state.visibleAlbum.tracks"
+        :key="track.id"
+        class="track"
+        :data-index="index"
+      >
+        <div class="track__ic-container"><i class="icon-pause"></i></div>
+        <span class="track__name">{{ track.name }}</span>
+        <span class="track__time">{{ track.duration_ms | duration('milliseconds')}}</span>
+      </div>
+    </transition-group>
   </div>
 </template>
 <script>
-  import duration from '@/filters/duration'
+import duration from '@/filters/duration'
+
 export default {
-  filters: { duration }
+  filters: { duration },
+  methods: {
+    beforeEnter(el) {
+      el.style.setProperty('--delay', (el.dataset.index * 40) + 500 + 'ms')
+    },
+  }
 }
 </script>
 <style lang="scss" scoped>
@@ -47,6 +64,17 @@ export default {
 
     &:not(:last-of-type) {
       margin-bottom: 16px;
+    }
+
+    &-enter-active,
+    &-leave-active {
+      transition: transform 300ms var(--delay), opacity 100ms var(--delay);
+    }
+
+    &-enter,
+    &-leave-to {
+      opacity: 0;
+      transform: translateY(-50%);
     }
   }
 </style>

@@ -1,10 +1,13 @@
 <template>
   <div id="drawer">
     <Albums id="albums"/>
-    <AlbumTracks
-      v-if="$store.state.visibleAlbum.viewing"
-      id="album_tracks"
-    />
+    <transition name="tracks">
+      <AlbumTracks
+        v-if="$store.state.visibleAlbum.viewing"
+        id="album_tracks"
+      />
+    </transition>
+
   </div>
 </template>
 
@@ -22,7 +25,10 @@
             }
         },
         created() {
-            this.$store.dispatch(PLAYER__FETCH)
+          if (this.$store.state.auth.expires_in > Date.now()) {
+            return this.$router.replace('/');
+          }
+          this.$store.dispatch(PLAYER__FETCH)
             // this.startSpotifySdk();
         },
         destroyed() {
@@ -94,5 +100,18 @@
     border-top-right-radius: 16px;
     margin: 0 auto;
     right: 0;
+  }
+
+  .tracks {
+    &-enter-active,
+    &-leave-active {
+      transition: transform .5s cubic-bezier(.31,.8,.65,1.01), opacity 300ms cubic-bezier(.31,.8,.65,1.01);
+    }
+
+    &-enter,
+    &-leave-to {
+      transform: translateY(100%);
+      opacity: 0;
+    }
   }
 </style>
