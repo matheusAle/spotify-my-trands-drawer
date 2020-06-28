@@ -20,7 +20,7 @@ const _getMutations = (stateDef, { mutations = {}, state = {} } = {}) => {
   })
 };
 
-export const SET_AUTH = 'SE_AUTH';
+export const SET_AUTH = 'SET_AUTH';
 
 const ALBUMS = 'albums';
 export const ALBUMS__FETCH_DISCS = `${ALBUMS}/FETCH`;
@@ -36,7 +36,15 @@ export const ALBUM_VISIBLE__UNSET = `${ALBUM_VISIBLE}/UNSET_VISIBLE`;
 export default new Vuex.Store({
   state: {
     isAuthorized: !!loadSession(),
-    auth: loadSession(),
+    auth: (() => {
+      const auth = loadSession();
+      if (auth && auth.expires_in < Date.now()) {
+        storeSession(null);
+        return {};
+      } else {
+        return auth;
+      }
+    })(),
   },
   mutations: {
     [SET_AUTH]: (state, auth) => {

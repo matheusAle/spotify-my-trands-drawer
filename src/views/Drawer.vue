@@ -16,87 +16,83 @@
 </template>
 
 <script>
-  import AlbumTracks from './AlbumTracks'
-  import Albums from './Albums';
-  import {loadSpoifySdk} from "../services/spotify";
-  import {ALBUM_VISIBLE__UNSET, PLAYER__FETCH, SET_AUTH} from "../store";
+import AlbumTracks from './AlbumTracks'
+import Albums from './Albums';
+import {loadSpoifySdk} from "../services/spotify";
+import {ALBUM_VISIBLE__UNSET, PLAYER__FETCH} from "../store";
 
-  export default {
-    components: { AlbumTracks, Albums },
-    data() {
-      return {
-        player: null,
-        offset: 0,
-        screenY: null,
-      }
+export default {
+  components: { AlbumTracks, Albums },
+  data() {
+    return {
+      player: null,
+      offset: 0,
+      screenY: null,
+    }
+  },
+  created() {
+    this.$store.dispatch(PLAYER__FETCH)
+    // this.startSpotifySdk();
+  },
+  destroyed() {
+    if (this.player) {
+      this.player.disconnect()
+    }
+  },
+  methods: {
+    touchend() {
+      this.offset = 0;
     },
-    created() {
-      if (this.$store.state.auth.expires_in > Date.now()) {
-        this.$store.dispatch(SET_AUTH, false);
-        return this.$router.replace('/');
-      }
-      this.$store.dispatch(PLAYER__FETCH)
-      // this.startSpotifySdk();
+    touchstart({ touches:[touch]}) {
+      this.offset = 0;
+      this.screenY = touch.screenY;
     },
-    destroyed() {
-      if (this.player) {
-        this.player.disconnect()
+    touchmove({ touches:[touch], }) {
+      const offset = (-(this.screenY - touch.screenY));
+      if (offset < 0) {
+        return;
       }
+      if (offset > 100) {
+        this.$store.dispatch(ALBUM_VISIBLE__UNSET);
+        return;
+      }
+      this.offset = offset + 'px';
     },
-    methods: {
-      touchend() {
-        this.offset = 0;
-      },
-      touchstart({ touches:[touch]}) {
-        this.offset = 0;
-        this.screenY = touch.screenY;
-      },
-      touchmove({ touches:[touch], }) {
-        const offset = (-(this.screenY - touch.screenY));
-        if (offset < 0) {
-          return;
-        }
-        if (offset > 100) {
-          this.$store.dispatch(ALBUM_VISIBLE__UNSET);
-          return;
-        }
-        this.offset = offset + 'px';
-      },
-      async startSpotifySdk() {
-        const Spotify = await loadSpoifySdk();
-        const player = new Spotify.Player({
-          name: 'Web Playback SDK Quick Start Player',
-          getOAuthToken: cb => { cb(this.$store.state.auth.access_token); }
-        });
+    async startSpotifySdk() {
+      const Spotify = await loadSpoifySdk();
+      const player = new Spotify.Player({
+        name: 'Web Playback SDK Quick Start Player',
+        getOAuthToken: cb => { cb(this.$store.state.auth.access_token); }
+      });
 
-        this.player = player;
+      this.player = player;
 
-        // Error handling
-        player.addListener('initialization_error', ({ message }) => { console.error(message); });
-        player.addListener('authentication_error', ({ message }) => { console.error(message); });
-        player.addListener('account_error', ({ message }) => { console.error(message); });
-        player.addListener('playback_error', ({ message }) => { console.error(message); });
+      // Error handling
+      player.addListener('initialization_error', ({ message }) => { console.error(message); });
+      player.addListener('authentication_error', ({ message }) => { console.error(message); });
+      player.addListener('account_error', ({ message }) => { console.error(message); });
+      player.addListener('playback_error', ({ message }) => { console.error(message); });
 
-        // Playback status updates
-        player.addListener('player_state_changed', state => { console.log(state); });
+      // Playback status updates
+      player.addListener('player_state_changed', state => { console.log(state); });
 
-        // Ready
-        player.addListener('ready', (data) => {
-          console.log('Ready with Device ID', data);
-          player.getCurrentState().then(console.log);
-        });
+      // Ready
+      player.addListener('ready', (data) => {
+        console.log('Ready with Device ID', data);
+        player.getCurrentState().then(console.log);
+      });
 
-        // Not Ready
-        player.addListener('not_ready', ({ device_id }) => {
-          console.log('Device ID has gone offline', device_id);
-        });
+      // Not Ready
+      player.addListener('not_ready', ({ device_id }) => {
+        console.log('Device ID has gone offline', device_id);
+      });
 
-        // Connect to the player!
-        player.connect();
+      // Connect to the player!
+      player.connect();
 
-      }
     }
   }
+}
 </script>
 
 <style lang="scss" scoped>

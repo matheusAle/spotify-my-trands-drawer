@@ -7,7 +7,6 @@ import {SET_AUTH} from "../store";
 export default {
     created() {
         const searchParams = new URLSearchParams(location.href.split(/[?|#]/g)[1]);
-        console.log(searchParams);
         this.$store.commit(SET_AUTH, {
             access_token: searchParams.get('access_token'),
             token_type: searchParams.get('token_type'),
