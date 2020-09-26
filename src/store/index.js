@@ -90,7 +90,6 @@ export default new Vuex.Store({
             commit('setLoading', true);
             const tracks = await fetchAlbumTracks(rootState.auth, album);
             commit('setTracks', tracks.items);
-          } catch (e) {
           } finally {
             commit('setLoading', false);
           }

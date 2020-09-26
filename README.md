@@ -2,7 +2,7 @@
 
 # My Spotify Trends Drawer 
 
-An App to view my most heard on spotify.
+An App to view my most heard albums on spotify.
 
 
 [live on](https://spotify-my-trends-drawer.netlify.app)
