@@ -63,7 +63,6 @@ export default {
     },
     scroll({ target: { scrollTop } }) {
       this.offset = scrollTop;
-      console.log(scrollTop)
     },
     touchstart({ touches:[touch]}) {
       this.screenY = touch.screenY;
