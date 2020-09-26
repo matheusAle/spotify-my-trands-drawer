@@ -8,7 +8,7 @@
 export default {
     methods: {
         auth() {
-            const clientId = '0099f94eb49845189065c0ed6bce7bf3';
+            const clientId = process.env.VUE_APP_SPOTIFY_CLIENT_ID;
             const authUrl = 'https://accounts.spotify.com/authorize';
             const responseType = 'token';
             const redirectUrl = encodeURI(`${location.origin}${process.env.BASE_URL}auth-callback`);
@@ -20,7 +20,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "@/theme";
+@import "@/vars";
 
 .container {
     height: 100%;

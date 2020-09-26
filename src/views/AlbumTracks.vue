@@ -31,7 +31,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-  @import "@/theme";
+  @import "@/vars";
   .album_track_list {
     padding: 64px 32px;
     box-sizing: border-box;
@@ -43,23 +43,24 @@ export default {
     align-items: center;
 
     &__ic-container {
-      margin-right: .5rem;
+      margin-right: .5em;
       overflow: hidden;
       color: $color-orange;
     }
 
     &__name {
       width: 100%;
-      font-size: 1.2rem;
+      font-size: 1.2em;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     &__time {
-      margin-left: .5rem;
+      margin-left: .5em;
       color: $color-darker;
       opacity: .6;
+      font-size: .9em;
     }
 
     &:not(:last-of-type) {

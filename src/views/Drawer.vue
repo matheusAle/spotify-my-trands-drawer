@@ -1,15 +1,20 @@
 <template>
-  <div id="drawer" :style="{'--offset': offset}">
-    <Albums id="albums"/>
+  <div id="drawer" :style="{'--offset': `${offset < 0 ? -offset : 0}px`}">
+    <Albums
+      id="albums"
+      :activeItemsStats="activeItemsStats"
+    />
     <transition name="tracks">
-      <div class="tracks-container" v-if="$store.state.visibleAlbum.viewing">
-        <AlbumTracks
-          class="album_tracks"
-          @touchmove="touchmove"
-          @touchend="touchend"
-          @touchstart="touchstart"
-          @click="e => e.stopPropagation()"
-        />
+      <div id="tracks-container" v-if="$store.state.visibleAlbum.viewing">
+        <div class="tracks-wrapper" ref="tracksWrapper" @scroll="scroll($event)">
+          <AlbumTracks
+            class="album_tracks"
+            @touchmove="touchmove"
+            @touchend="touchend"
+            @touchstart="touchstart"
+            @click="e => e.stopPropagation()"
+          />
+        </div>
       </div>
     </transition>
   </div>
@@ -23,6 +28,9 @@ import {ALBUM_VISIBLE__UNSET, PLAYER__FETCH} from "../store";
 
 export default {
   components: { AlbumTracks, Albums },
+  filters: {
+
+  },
   data() {
     return {
       player: null,
@@ -39,24 +47,38 @@ export default {
       this.player.disconnect()
     }
   },
+  computed: {
+    activeItemsStats() {
+      if (this.offset < 0) {
+        return { transform: `translateY(${ this.offset }px)` }
+      }
+      return { transform: `translateY(${ -this.offset }px) scale(${ 1 - (this.offset / 2500) })` }
+    }
+  },
   methods: {
     touchend() {
-      this.offset = 0;
+      if (this.offset < 0) {
+        this.offset = 0;
+      }
+    },
+    scroll({ target: { scrollTop } }) {
+      this.offset = scrollTop;
+      console.log(scrollTop)
     },
     touchstart({ touches:[touch]}) {
-      this.offset = 0;
       this.screenY = touch.screenY;
     },
-    touchmove({ touches:[touch], }) {
-      const offset = (-(this.screenY - touch.screenY));
-      if (offset < 0) {
+    touchmove({ touches: [ touch ]}) {
+       const offset = this.screenY - touch.screenY;
+      if (offset > 0 || this.$refs.tracksWrapper.scrollTop !== 0) {
         return;
       }
-      if (offset > 100) {
+      if (offset < -100) {
+        this.offset = 0;
         this.$store.dispatch(ALBUM_VISIBLE__UNSET);
         return;
       }
-      this.offset = offset + 'px';
+      this.offset = offset;
     },
     async startSpotifySdk() {
       const Spotify = await loadSpoifySdk();
@@ -96,11 +118,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  @import "@/responsive-mixin";
 
   #drawer {
     height: 100vh;
     width: 100vw;
     overflow: hidden;
+    display: flex;
+    align-content: center;
   }
 
   #albums {
@@ -108,39 +133,55 @@ export default {
     height: 100%;
   }
 
-  .tracks-container {
+
+  #tracks-container {
     overflow: hidden;
     position: fixed;
     top: 0;
-    left: 0;
+    right: 0;
     width: 100vw;
     height: 100vh;
+    max-height: 100vh;
     background-color: #000000ba;
 
+    .tracks-wrapper {
+      overflow: auto;
+      max-height: 100%;
+      width: 100%;
+      height: 100%;
+    }
+
     .album_tracks {
-      height: 65vh;
+      /*height: 65vh;*/
       width: 95vw;
       background: white;
-      margin: 0 auto;
       z-index: 1;
       bottom: 0;
       overflow: hidden;
-      position: fixed;
-      left: 0;
       border-top-left-radius: 16px;
       border-top-right-radius: 16px;
-      right: 0;
       transform: translateY(var(--offset));
+      margin-top: 40vh;
+      min-height: 60vh;
+      margin-left: auto;
+      margin-right: auto;
+
+      @include min-sm() {
+        width: 650px;
+      }
     }
   }
 
   .tracks {
+    &-leave-active {
+      background-color: transparent !important;
+    }
     &-enter-active,
     &-leave-active {
       transition: background-color .4s cubic-bezier(.31,.8,.65,1.01);
 
       .album_tracks {
-        transition: transform .5s cubic-bezier(.31,.8,.65,1.01), opacity 300ms cubic-bezier(.31,.8,.65,1.01);
+        transition: transform .300ms cubic-bezier(.31,.8,.65,1.01), opacity 300ms cubic-bezier(.31,.8,.65,1.01);
       }
     }
 

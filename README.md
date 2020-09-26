@@ -1,34 +1,17 @@
-# spot-drawer
+[![Netlify Status](https://api.netlify.com/api/v1/badges/59708959-5229-4bbe-a09c-52b21003cd7a/deploy-status)](https://app.netlify.com/sites/gallant-wright-315435/deploys)
 
-## Project setup
-```
-npm install
-```
+# My Spotify Trends Drawer 
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+An App to view my most heard on spotify.
 
-### Compiles and minifies for production
-```
-npm run build
-```
 
-### Run your unit tests
-```
-npm run test:unit
-```
+[live on](https://spotify-my-trends-drawer.netlify.app)
 
-### Run your end-to-end tests
-```
-npm run test:e2e
-```
+#### Built with
+ - Vue 2
+ - VueCLI 3
+ - VueX 3
 
-### Lints and fixes files
-```
-npm run lint
-```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+![preview](./docs/preview.gif)
+

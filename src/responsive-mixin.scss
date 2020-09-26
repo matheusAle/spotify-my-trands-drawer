@@ -1,0 +1,44 @@
+$screen-xs: 576px !default;
+$screen-sm: 768px !default;
+$screen-md: 992px !default;
+$screen-lg: 1200px !default;
+$screen-wd: 1440px !default; // wide
+$screen-uw: 1600px !default; // ultra wide
+
+$screen-xs-min: $screen-xs !default;
+$screen-sm-min: $screen-sm !default;
+$screen-md-min: $screen-md !default;
+$screen-lg-min: $screen-lg !default;
+$screen-wd-min: $screen-wd !default;
+$screen-uw-min: $screen-uw !default;
+
+$screen-xs-max: $screen-sm !default;
+$screen-sm-max: $screen-md !default;
+$screen-md-max: $screen-lg !default;
+$screen-lg-max: $screen-wd !default;
+$screen-wd-max: $screen-uw !default;
+
+@mixin min-sm {
+  @media (min-width: #{$screen-sm}) { @content; }
+}
+
+
+@mixin min-md {
+  @media (min-width: #{$screen-md}) { @content; }
+}
+
+@mixin only-md {
+  @media (min-width: #{$screen-md-min}) and (max-width: #{$screen-md-max}) { @content; }
+}
+
+@mixin min-lg {
+  @media (min-width: #{$screen-lg}) { @content; }
+}
+
+@mixin only-lg {
+  @media (min-width: #{$screen-lg-min}) and (max-width: #{$screen-lg-max}) { @content; }
+}
+
+@mixin min-wd {
+  @media (min-width: #{$screen-wd}) { @content; }
+}
